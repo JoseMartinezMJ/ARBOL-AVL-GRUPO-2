@@ -1,0 +1,429 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <algorithm>
+#include <cstdlib>
+#include <random>
+#include <cmath>
+
+using namespace std;
+
+namespace PokemonLeagueTypes
+{
+    //Prototipos en estructuras
+    struct ataque
+    {
+        int id;
+        string nombre;
+        int valor;
+    };
+    struct IStats
+    {
+        int vida;
+        int ataque;
+        int defensa;
+        int velocidad;
+    };
+    struct IPokemon
+    {
+        bool vencido;
+        vector<string> debilidades;
+        vector<ataque> ataques;
+        string nombre;
+        IStats stats;
+    };
+    struct IEntrenador
+    {
+        string nombre;
+        IPokemon elegido;
+        vector<IPokemon> equipo;
+    };
+}
+
+namespace PokemonLeague
+{
+    using namespace PokemonLeagueTypes;
+
+    enum PokemonTypes
+    {
+        fuego,
+        agua,
+        electrico
+    };
+
+    class Pokemon : IPokemon
+    {
+    public:
+        bool vencido;
+        PokemonTypes tipo;
+        vector<string> debilidades;
+        vector<ataque> ataques;
+        string nombre;
+        IStats stats;
+        string getType()
+        {
+            switch (this->tipo)
+            {
+            case 0:
+                return "fuego";
+                break;
+            case 1:
+                return "agua";
+                break;
+            case 2:
+                return "electrico";
+                break;
+            default:
+                return "normal";
+                break;
+            };
+        };
+
+        Pokemon(){};
+        Pokemon(string nombre, PokemonTypes tipo, int vida, int ataque, int defensa, int velocidad);
+        Pokemon(string nombre, int vida, int ataque, int defensa, int velocidad);
+    };
+
+    //Pokemon tipo fuego------------
+    class Fuego : public Pokemon
+    {
+    public:
+        Fuego(string nombre, int vida, int ataque, int defensa, int velocidad)
+        {
+            this->tipo = fuego;
+            this->vencido = false;
+            this->stats.ataque = 2 + rand() % 10;
+            this->debilidades = {"agua", "tierra", "roca"};
+            this->nombre = nombre;
+            this->stats.vida = vida;
+            this->stats.defensa = defensa;
+            this->stats.velocidad = velocidad;
+        };
+    };
+
+    //Pokemon tipo agua-----------------
+    class Agua : public Pokemon
+    {
+    public:
+        Agua(string nombre, int vida, int ataque, int defensa, int velocidad)
+        {
+            this->tipo = agua;
+            this->vencido = false;
+            this->stats.ataque = 2 + rand() % 10;
+            this->debilidades = {"electrico", "hierva"};
+            this->nombre = nombre;
+            this->stats.vida = vida;
+            this->stats.defensa = defensa;
+            this->stats.velocidad = velocidad;
+        };
+    };
+
+    //Pokemon tipo electrico----------------
+    class Electrico : public Pokemon
+    {
+    public:
+        Electrico(string nombre, int vida, int ataque, int defensa, int velocidad)
+        {
+            this->tipo = electrico;
+            this->vencido = false;
+            this->stats.ataque = 2 + rand() % 10;
+            this->debilidades = {"tierra"};
+            this->nombre = nombre;
+            this->stats.vida = vida;
+            this->stats.defensa = defensa;
+            this->stats.velocidad = velocidad;
+        };
+    };
+
+
+    //Comprueba si el pokemon es dÃ©bil
+    bool isDebilidad(Pokemon &pok, Pokemon &pok2)
+    {
+        string tipo = pok2.getType();
+        return (std::find(pok.debilidades.begin(), pok.debilidades.end(), tipo) != pok.debilidades.end());
+    }
+
+    //Obtener el ataque total hecho
+    int createAtaque(Pokemon &atacante, int attc, Pokemon &atacado)
+    {
+        bool esDebil = isDebilidad(atacado, atacante);
+        ataque att = atacante.ataques.at(attc);
+        int tenp = (att.valor * atacante.stats.ataque) / 100;
+        return tenp + (esDebil ? att.valor * 2 : att.valor);
+    };
+
+    //Agregar un ataque nuevo
+    void addAtaque(Pokemon &pok, string nombre, int valor)
+    {
+        ataque attc = {};
+        attc.id = pok.ataques.size();
+        attc.nombre = nombre;
+        attc.valor = valor;
+        pok.ataques.push_back(attc);
+    }
+
+    //ENTRENADOR
+    class Entrenador : IEntrenador
+    {
+    public:
+        Pokemon elegido;
+        string nombre;
+        vector<Pokemon> equipo;
+
+        //Para seleccionar un pokemon
+        Pokemon elegirPokemon()
+        {
+            vector<Pokemon> pokemons = this->equipo;
+            cout << "\t\t---Equipo de "<<this->nombre<<"---" << endl;
+            for (int i = 0; i < pokemons.size(); i++)
+            {
+                if (!pokemons[i].vencido)
+                {
+                    cout << "\t\t" << i << ". " << pokemons[i].nombre << ", vida: " << pokemons[i].stats.vida << endl;
+                };
+            };
+            cout << "\tElegir Pokemon: ";
+            int posicion;
+            cin >> posicion;
+            this->elegido = this->equipo[posicion];
+            return this->equipo[posicion];
+        };
+
+
+        //Para escoger el ataque
+        ataque elegirAtaque(Pokemon &pok)
+        {
+            bool correcto = false;
+                int _ataque;
+                vector<ataque> ataques = pok.ataques;
+                cout << "\t\t---Ataques de " << pok.nombre << "---" << endl;
+                for (int i = 0; i < ataques.size(); i++)
+                {
+                    cout << "\t\t" << i << ". " << ataques[i].nombre <<", Poder: "<< ataques[i].valor << endl;
+                };
+                cout << "\t\t4. Cambiar Pokemon"<< endl;
+                cout << "\tElegir ataque: ";
+                cin >> _ataque;
+                if (_ataque == 4)
+                {
+                    elegirPokemon();
+                    return ataques[0];
+                }
+                else
+                {
+                    return ataques[_ataque];
+                }
+        };
+        
+        //Constructor
+        Entrenador(string nombre, vector<Pokemon> equipo)
+        {
+            this->nombre = nombre;
+            this->equipo = equipo;
+        }
+
+    };
+
+    //Crea un nuevo entrenador
+    Entrenador crearEntrenador(vector<Pokemon> equipo, int numero)
+    {
+        string nombre;
+        cout << "\tIngrese nombre de entrenador " << numero << ": ";
+        cin >> nombre;
+        Entrenador ent(nombre, equipo);
+        return ent;
+    }
+
+    // Escoger ataque, calcular total, restar a la vida.
+    void atacar(Entrenador &atacante, Entrenador &atacado)
+    {
+        //Elegir ataque
+        cout << "\n\tTurno para atacar de: " << atacante.nombre << endl;
+        Pokemon pokemonAtacante = atacante.elegido;
+        ataque att = atacante.elegirAtaque(pokemonAtacante);
+
+        //Comprobar si el atacado es debil;
+        if (isDebilidad(atacado.elegido, atacante.elegido))
+        {
+            cout <<"\t"<< atacado.elegido.nombre << " es debil contra " << atacante.elegido.nombre << " ataque critico..." << endl;
+        }
+        else
+        {
+            cout <<"\t"<< atacado.elegido.nombre << " no es debil contra " << atacante.elegido.nombre <<"..."<< endl;
+        }
+
+        //Obtener el total del ataque
+        int totalAtaque = createAtaque(atacante.elegido, att.id, atacado.elegido);
+
+        //Restar ataque a la defensa si es mayor de cero, si no a laa vida
+        if (atacado.elegido.stats.defensa > 0)
+        {
+            atacado.elegido.stats.defensa -= totalAtaque;
+            for (int i = 0; i < atacado.equipo.size(); i++)
+            {
+                if (atacado.equipo[i].nombre == atacado.elegido.nombre)
+                {
+                    atacado.equipo[i].stats.defensa -= totalAtaque;
+                };
+            };
+        }
+        else
+        {
+            atacado.elegido.stats.vida -= totalAtaque;
+
+            for (int i = 0; i < atacado.equipo.size(); i++)
+            {
+                if (atacado.equipo[i].nombre == atacado.elegido.nombre)
+                {
+                    atacado.equipo[i].stats.vida -= totalAtaque;
+                };
+            };
+        }
+
+        //Saber si el pokemon ya fue vencido, si es asi se quita de los pokemon disponibles
+        if (atacado.elegido.stats.vida <= 0)
+        {
+            atacado.elegido.vencido = true;
+            for (int i = 0; i < atacado.equipo.size(); i++)
+            {
+                if (atacado.equipo[i].nombre == atacado.elegido.nombre)
+                {
+                    atacado.equipo[i].vencido = true;
+                };
+            };
+            cout <<"\t"<< atacado.elegido.nombre <<" fue derrotadoo...\n" << endl;
+        }
+    };
+
+    //Total de pokemons disponibles por entrenador  
+    int disponibles(Entrenador &ent)
+    {
+        int total = 0;
+        for (int i = 0; i < ent.equipo.size(); i++)
+        {
+            if (!ent.equipo[i].vencido)
+            {
+                total++;
+            }
+        };
+        return total;
+    };
+}
+
+
+using namespace PokemonLeague;
+
+
+int main()
+{
+    //POKEMON DISPONIBLES
+    Fuego Charizard("Charizard", 225, 223, 173, 3);
+    Agua Goldeen("Goldeen", 295, 123, 110, 2);
+    Electrico Pikachu("Pikachu", 275, 112, 96, 4);
+    Fuego Arcanine("Arcanine", 350, 227, 166, 5);
+    Agua Squirtle("Squirtle", 295, 94, 121, 4);
+    Electrico Magnemite("Magnemite", 254, 165, 121, 4);
+
+    // Ataques de Charizard
+    addAtaque(Charizard, "Ascuas", 45);
+    addAtaque(Charizard, "Lanzallamas", 90);
+    addAtaque(Charizard, "Cuchillada", 70);
+    addAtaque(Charizard, "Girafuego", 35);
+    // Ataques de Blastoise
+    addAtaque(Squirtle, "Hidrobomba", 110);
+    addAtaque(Squirtle, "Pistola de agua", 80);
+    addAtaque(Squirtle, "Mordisco", 60);
+    addAtaque(Squirtle, "Cabezazo", 130);
+    // Ataques Pikachu
+    addAtaque(Pikachu, "Impactrueno", 40);
+    addAtaque(Pikachu, "Rayo", 90);
+    addAtaque(Pikachu, "Trueno", 110);
+    addAtaque(Pikachu, "Onda trueno", 50);
+    // Ataques Magnemite
+    addAtaque(Magnemite, "Impactrueno", 40);
+    addAtaque(Magnemite, "Onda trueno", 50);
+    addAtaque(Magnemite, "Rapidez", 60);
+    addAtaque(Magnemite, "ElectrocaÃ±on", 120);
+    // Ataques Arcanine
+    addAtaque(Arcanine, "Ascuas", 45);
+    addAtaque(Arcanine, "Derribo", 90);
+    addAtaque(Arcanine, "Colmillo igneo", 65);
+    addAtaque(Arcanine, "Mordisco", 60);
+    // Ataques Goldeen
+    addAtaque(Goldeen, "Cascada", 80);
+    addAtaque(Goldeen, "Cornadas", 65);
+    addAtaque(Goldeen, "Picotazo", 35);
+    addAtaque(Goldeen, "Megacuerno", 120);
+
+    cout << "\t-----SIMULADOR DE BATALLAS POKEMON-----\n" << endl;
+
+    //Crear los dos entrenadores
+    Entrenador Entrenador1 = crearEntrenador({Charizard, Goldeen, Pikachu}, 1);
+    Entrenador Entrenador2 = crearEntrenador({Arcanine, Squirtle, Magnemite,}, 2);
+
+    //INICIO DEL JUEGO
+    cout << "\n\t--------" << Entrenador1.nombre << " VS " << Entrenador2.nombre << "--------\n" << endl;
+    int batallasCompletadas = 0;
+
+    //Finaliza hasta que un entrenador se quede sin pokemon.
+    while (disponibles(Entrenador1) > 0 && disponibles(Entrenador2) > 0)
+    {
+        //EQUIPO 1
+        Entrenador1.elegirPokemon();
+        cout << "\tEntrenador 1: " << Entrenador1.nombre << "\tJugador: " << Entrenador1.elegido.nombre << "\n"<< endl;
+
+        //EQUIPO 2
+        Entrenador2.elegirPokemon();
+        cout << "\tEntrenador 2: " << Entrenador2.nombre << "\tJugador: " << Entrenador2.elegido.nombre << "\n"<< endl;
+
+        cout << "\t--------" << Entrenador1.elegido.nombre << " VS " << Entrenador2.elegido.nombre << "--------" << endl;
+        cout << "\n\tRONDA " << batallasCompletadas + 1 << endl;
+
+        //Comprobar que pokemon es mas veloz
+        int ronda = Entrenador1.elegido.stats.velocidad > Entrenador2.elegido.stats.velocidad ? 1 
+                    : Entrenador1.elegido.stats.velocidad < Entrenador2.elegido.stats.velocidad ? 2 
+                    : 1;
+
+        if(Entrenador1.elegido.stats.velocidad > Entrenador2.elegido.stats.velocidad)
+        {
+            cout <<"\t"<< Entrenador1.elegido.nombre << " es mas veloz que " << Entrenador2.elegido.nombre << "..." <<endl;
+        }
+        else
+        {
+            cout <<"\t"<< Entrenador2.elegido.nombre << " es mas veloz que " << Entrenador1.elegido.nombre << "..." <<endl;
+
+        }
+        //Bucle de lucha del jugador actual
+        while (Entrenador1.elegido.stats.vida > 0 && Entrenador2.elegido.stats.vida > 0)
+        {
+
+            if (ronda == 1)
+            {
+                atacar(Entrenador1, Entrenador2);
+                ronda = 2;
+            }
+            else if (ronda == 2)
+            {
+                atacar(Entrenador2, Entrenador1);
+                ronda = 1;
+            }
+        }
+        batallasCompletadas++;
+        ronda = 1;
+    };
+
+    if(disponibles(Entrenador1) > disponibles(Entrenador2))
+    {
+        cout<<"\n"<<endl;
+        cout<<"\t"<<Entrenador1.nombre<<"!! Haz logrado ganar la liga Pokemon!"<<endl;
+        cout<<"\tFelicidades ahora eres un maestro Pokemon!"<<endl;
+	} 
+    else
+    {
+        cout<<"\n"<<endl;
+        cout<<"\t"<<Entrenador2.nombre<<"!! Haz logrado ganar la liga Pokemon!"<<endl;
+        cout<<"\tFelicidades ahora eres un maestro Pokemon!"<<endl;
+    }
+
+
+    return 0;
