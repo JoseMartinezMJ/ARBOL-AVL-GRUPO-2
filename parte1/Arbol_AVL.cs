@@ -32,7 +32,7 @@ namespace Arbol_AVL
         }
 
         //FUNCIONES DE LA CLASE ARBOL_AVL
-        public Arbol_AVL Insertar (int ClaveNueva, Arbol_AVL Raiz)
+        public Arbol_AVL Insertar (int ClaveNueva, Arbol_AVL Raiz)//Funcion que inserta las claves aleatoria a los nodos
         {
             if (Raiz == null)
             {
@@ -51,5 +51,6 @@ namespace Arbol_AVL
                 MessageBox.Show("Valor Existente en el Arbol", "Error", MessageBoxButtons.OK);
             }
         }
+        //Falta terminar la funcion 11/6/2022
     }
 }
