@@ -50,7 +50,69 @@ namespace Arbol_AVL
             {
                 MessageBox.Show("Valor Existente en el Arbol", "Error", MessageBoxButtons.OK);
             }
+            //Falta terminar la funcion 11/6/2022
+             //Realiza las rotaciones simples o dobles segun el caso
+            if (Alturas(Raiz.NodoIzquierdo) - Alturas(Raiz.NodoDerecho) == 2)
+            {
+                if (ClaveNueva < Raiz.NodoIzquierdo.Clave)
+                    Raiz = RotacionIzquierdaSimple(Raiz);
+                else
+                    Raiz = RotacionIzquierdaDoble(Raiz);
+            }
+            if (Alturas(Raiz.NodoDerecho) - Alturas(Raiz.NodoIzquierdo) == 2)
+            {
+                if (ClaveNueva > Raiz.NodoDerecho.Clave)
+                    Raiz = RotacionDerechaSimple(Raiz);
+                else
+                    Raiz = RotacionDerechaDoble(Raiz);
+            }
+            Raiz.Altura = max(Alturas(Raiz.NodoIzquierdo), Alturas(Raiz.NodoDerecho)) + 1;
+            return Raiz;
         }
-        //Falta terminar la funcion 11/6/2022
+        //FUNCIONES PARA ROTACIONES
+        //Función para obtener que rama es mayor
+        private static int max(int lhs, int rhs)
+        {
+            return lhs > rhs ? lhs : rhs;
+        }
+        private static int Alturas(Arbol_AVL Raiz)
+        {
+            return Raiz == null ? -1 : Raiz.Altura;
+        }
+        //Seccion de funciones de rotaciones
+        //Rotacion Izquierda Simple
+        private static Arbol_AVL RotacionIzquierdaSimple(Arbol_AVL k2)
+        {
+            Arbol_AVL k1 = k2.NodoIzquierdo;
+            k2.NodoIzquierdo = k1.NodoDerecho;
+            k1.NodoDerecho = k2;
+            k2.Altura = max(Alturas(k2.NodoIzquierdo), Alturas(k2.NodoDerecho)) + 1;
+            k1.Altura = max(Alturas(k1.NodoIzquierdo), k2.Altura) + 1;
+            return k1;
+        }
+        //Rotacion Derecha Simple
+        private static Arbol_AVL RotacionDerechaSimple(Arbol_AVL k1)
+        {
+            Arbol_AVL k2 = k1.NodoDerecho;
+            k1.NodoDerecho = k2.NodoIzquierdo;
+            k2.NodoIzquierdo = k1;
+            k1.Altura = max(Alturas(k1.NodoIzquierdo), Alturas(k1.NodoDerecho)) + 1;
+            k2.Altura = max(Alturas(k2.NodoDerecho), k1.Altura) + 1;
+            return k2;
+        }
+        //Doble Rotacion Izquierda
+        private static Arbol_AVL RotacionIzquierdaDoble(Arbol_AVL k3)
+        {
+            k3.NodoIzquierdo = RotacionDerechaSimple(k3.NodoIzquierdo);
+            return RotacionIzquierdaSimple(k3);
+        }
+        //Doble Rotacion Derecha
+        private static Arbol_AVL RotacionDerechaDoble(Arbol_AVL k1)
+        {
+            k1.NodoDerecho = RotacionIzquierdaSimple(k1.NodoDerecho);
+            return RotacionDerechaSimple(k1);
+        }
+        //MODIFICACION 11/7/20222
+        
     }
 }
