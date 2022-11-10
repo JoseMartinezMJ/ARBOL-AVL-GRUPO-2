@@ -14,5 +14,13 @@ namespace AVL
             conn.Open();
             System.Windows.Forms.MessageBox.Show("Listo");
         }
+        public void InsertarBasedatos(int clave)
+        {
+            string query = "INSERT INTO \"ARBOL_AVL\" VALUES (" + clave + ")";
+            NpgsqlCommand Mensaje  = new NpgsqlCommand(query, conn);
+            Mensaje.ExecuteNonQuery();
+            MessageBox.Show("Clave insertada en la base de datos");
+            conn.Close();
+        }
     }
 }
