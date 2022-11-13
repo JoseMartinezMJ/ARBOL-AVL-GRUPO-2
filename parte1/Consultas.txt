@@ -1,0 +1,11 @@
+//Crear la tabla
+
+
+
+
+
+//Consulta para visualizar la tabla
+SELECT "CLAVE"
+	FROM public."ARBOL_AVL";
+//Consulta para evitar que se repitan las claves
+ALTER TABLE "ARBOL_AVL" ADD CONSTRAINT UQ_CLAVE UNIQUE("CLAVE")
